@@ -1,0 +1,75 @@
+package main
+
+import (
+	"fmt"
+)
+
+func printMatrix(matrix [][]bool) {
+
+	for row := 0; row < len(matrix); row++ {
+		for col := 0; col < len(matrix[0]); col++ {
+			if matrix[row][col] {
+				fmt.Print("1 ")
+			} else {
+				fmt.Print("0 ")
+			}
+		}
+		fmt.Print("\n")
+	}
+}
+
+func updateMatrix(matrix [][]bool) [][]bool {
+
+	matrix_copy := make([][]bool, len(matrix))
+	for i := range matrix_copy {
+		matrix_copy[i] = make([]bool, len(matrix[0]))
+	}
+
+	for row := 0; row < len(matrix); row++ {
+		for col := 0; col < len(matrix[0]); col++ {
+			lower_bound_col := max(0, col-1)
+			upper_bound_col := min(col+1, len(matrix[0])-1)
+
+			lower_bound_row := max(0, row-1)
+			upper_bound_row := min(row+1, len(matrix)-1)
+
+			counter := getLiveNeighbors(matrix, row, col, lower_bound_col, upper_bound_col, lower_bound_row,
+				upper_bound_row)
+			if matrix[row][col] { // live cell
+				matrix_copy[row][col] = counter == 2 || counter == 3
+			} else { // dead cell
+				matrix_copy[row][col] = counter == 3
+			}
+
+		}
+	}
+
+	return matrix_copy
+}
+
+func getLiveNeighbors(matrix [][]bool, origin_row int, origin_col int, lower_bound_col int, upper_bound_col int,
+	lower_bound_row int, upper_bound_row int) int {
+	counter := 0
+	for i := lower_bound_row; i <= upper_bound_row; i++ {
+		for j := lower_bound_col; j <= upper_bound_col; j++ {
+			if matrix[i][j] && !(origin_row == i && origin_col == j) {
+				counter++
+			}
+		}
+	}
+	//if matrix[origin_row][origin_col] {
+	//	counter--
+	//}
+	return counter
+}
+
+func main() {
+	matrix := [][]bool{
+		{true, false, true},
+		{false, true, false},
+		{false, false, true}}
+	printMatrix(matrix)
+	matrix_copy := updateMatrix(matrix)
+	fmt.Println()
+	printMatrix(matrix_copy)
+}
